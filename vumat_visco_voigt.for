@@ -2,6 +2,7 @@ c ======================================================================
 c User Subroutine VUMAT for Abaqus visco elastic material
 c All rights of reproduction or distribution in any form are reserved.
 c By Irfan Habeeb CN (Technion - IIT), cnirfan@gmail.com
+c using the formulation https://imechanica.org/files/Kelvin-Voigt-Code-Development_0.pdf
 c ======================================================================
       subroutine vumat(
 C Read only -
