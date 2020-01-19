@@ -34,12 +34,13 @@ c
 
       integer i, k1, k2
 
-      real*8 E, nu, eta, lambda, mu, D1(6,6), D2(6,6), D3(6,6)
+      real*8 E, nu, rho, eta, lambda, mu, D1(6,6), D2(6,6), D3(6,6)
 
 c material properties
       E = props(1)            ! Young's modulus
       nu = props(2)           ! Poisson's ratio
-      eta = props(3)          ! visco-elastic coef.
+      rho = props(3)          ! density
+      eta = props(4)          ! visco-elastic coef.
     
       do 10 i = 1, nblock
 
