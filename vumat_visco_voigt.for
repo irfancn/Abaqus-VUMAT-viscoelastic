@@ -34,8 +34,7 @@ c
 
       integer i, k1, k2
 
-      real*8 E, nu, eta, lambda, mu,
-     3  dde1(6,6), dde2(6,6), dde3(6,6)
+      real*8 E, nu, eta, lambda, mu, D1(6,6), D2(6,6), D3(6,6)
 
 c material properties
       E = props(1)            ! Young's modulus
@@ -49,41 +48,41 @@ c lame's parameters
         mu = E/(2.0d0*(1.0d0+nu))
 
 c stiffness matrix with viscous effects
-        dde1 = 0.d0
-        dde2 = 0.d0
-        dde3 = 0.d0
+        D1 = 0.d0
+        D2 = 0.d0
+        D3 = 0.d0
 
         if (stepTime .gt. 0.d0) then
           do k1 = 1, ndir
             do k2 = 1, ndir
-              dde1(k1, k2) = lambda*(1.0d0 + 3.0d0*eta/(E*dt))
-              dde2(k1, k2) = lambda
+              D1(k1, k2) = lambda*(1.0d0 + 3.0d0*eta/(E*dt))
+              D2(k1, k2) = lambda
             end do 
-            dde1(k1, k1) = lambda*(1.0d0 + 3.0d0*eta/(E*dt)) +
+            D1(k1, k1) = lambda*(1.0d0 + 3.0d0*eta/(E*dt)) +
      1        2.0d0*mu*(1.0d0 + eta/(mu*dt))
-            dde2(k1, k1) = lambda + 2.0d0*mu
-            dde3(k1, k1) = -1.0d0
+            D2(k1, k1) = lambda + 2.0d0*mu
+            D3(k1, k1) = -1.0d0
           end do 
 c shear stress
           do k1 = ndir+1, ndir+nshr
-            dde1(k1, k1) = mu*(1.0d0 + eta/(mu*dt))
-            dde2(k1, k1) = mu
-            dde3(k1, k1) = -1.0d0
+            D1(k1, k1) = mu*(1.0d0 + eta/(mu*dt))
+            D2(k1, k1) = mu
+            D3(k1, k1) = -1.0d0
           end do 
         else 
           do k1 = 1, ndir
             do k2 = 1, ndir
-              dde1(k1, k2) = lambda
-              dde2(k1, k2) = lambda
+              D1(k1, k2) = lambda
+              D2(k1, k2) = lambda
             end do 
-            dde1(k1, k1) = lambda + 2.0d0*mu
-            dde2(k1, k1) = lambda + 2.0d0*mu
-            dde3(k1, k1) = -1.0d0
+            D1(k1, k1) = lambda + 2.0d0*mu
+            D2(k1, k1) = lambda + 2.0d0*mu
+            D3(k1, k1) = -1.0d0
           end do 
         do k1 = ndir+1, ndir+nshr
-          dde1(k1, k1) = mu
-          dde2(k1, k1) = mu
-          dde3(k1, k1) = -1.0d0
+          D1(k1, k1) = mu
+          D2(k1, k1) = mu
+          D3(k1, k1) = -1.0d0
         end do 
         end if 
 
@@ -91,24 +90,27 @@ c updating the state variable (old stress)
         stateNew(i, 1:ndir+nshr) = stressOld(i, 1:ndir+nshr)
 
 c stress increment
-        do k1 = 1, 6
-          do k2 = 1, 6
-            stateNew(i,k1) = stateNew(i,k1) + 
-     1        dde1(k1,k2)*strainInc(i,k2) +
-     2        dde2(k1,k2) * stateOld(i,k2+12) +
-     3        dde3(k1,k2) * stressOld(i, k2)
+        do k1 = 1, ndir+nshr
+          do k2 = 1, ndir+nshr
+            stateNew(i, k1) = stateNew(i, k1) + 
+     1        D1(k1, k2) * strainInc(i, k2) +
+     2        D2(k1, k2) * stateOld(i,k2+ 12) +
+     3        D3(k1, k2) * stressOld(i, k2)
           end do 
         end do
 
 c updating stress from statevariables
-        do j = 1, 6
-          stressNew(i, j) = stateNew(i, j)
-        end do
+        stressNew(i, 1:ndir+nshr) = stateNew(i, 1:ndir+nshr)
 
 c Total strain stateNew(i,13-18) = total strain
-        stateNew(i, 13:18) = stateOld(i, 13:18) + strainInc(i, 1:6)
+        stateNew(i, 13:ndir+nshr) = stateOld(i, 13:ndir+nshr) + 
+     1    strainInc(i, 1:ndir+nshr)
+
+c updating the internal energy
+        enerInternNew(k) = enerInternOld(k) + 
+     1    dot_product( 0.5d0*(stressOld(k, 1:ndir+nshr) +
+     2    stressNew(k, 1:ndir+nshr)), strainInc(k, 1:ndir+nshr)) / rho
         
   10  continue
-
       return
       end
