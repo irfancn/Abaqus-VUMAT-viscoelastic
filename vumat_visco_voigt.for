@@ -81,11 +81,11 @@ c shear stress
             D2(k1, k1) = lambda + 2.0d0*mu
             D3(k1, k1) = -1.0d0
           end do 
-        do k1 = ndir+1, ndir+nshr
-          D1(k1, k1) = mu
-          D2(k1, k1) = mu
-          D3(k1, k1) = -1.0d0
-        end do 
+          do k1 = ndir+1, ndir+nshr
+            D1(k1, k1) = mu
+            D2(k1, k1) = mu
+            D3(k1, k1) = -1.0d0
+          end do 
         end if 
 
 c updating the state variable (old stress)
