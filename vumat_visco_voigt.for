@@ -35,7 +35,8 @@ c
 
       integer i, k1, k2
 
-      real*8 E, nu, rho, eta, lambda, mu, D1(6,6), D2(6,6), D3(6,6)
+      real*8 E, nu, rho, eta, lambda, mu, D1(ndir+nshr,ndir+nshr), 
+     1 D2(ndir+nshr,ndir+nshr), D3(ndir+nshr,ndir+nshr)
 
 c material properties
       E = props(1)            ! Young's modulus
